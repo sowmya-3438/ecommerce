@@ -1,0 +1,194 @@
+
+{% extends "base.html" %}
+
+{% block title %}Your Cart | ShopZone{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/user.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="shopping-cart-page">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="cart-alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Header -->
+    <div class="cart-heading">
+
+        <div>
+            <h5>YOUR SHOPPING BAG</h5>
+            <h1>Your Cart</h1>
+            <p>Review your items before checking out.</p>
+        </div>
+
+        <a href="{{ url_for('products') }}" class="continue-btn">
+            Continue shopping
+        </a>
+
+    </div>
+
+
+    {% if cart_items %}
+
+    <div class="cart-layout">
+
+        <!-- Products -->
+        <div class="cart-products">
+
+            {% for item in cart_items %}
+
+            <div class="cart-product">
+
+                <!-- Image -->
+                <div class="cart-image">
+
+                    {% if item.storedpath %}
+                    <img
+                        src="{{ url_for('static', filename=item.storedpath.replace('\\', '/').replace('static/', '')) }}"
+                        alt="{{ item.productname }}"
+                    >
+                    {% else %}
+                    <div class="no-image">No Image</div>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Details -->
+                <div class="cart-details">
+
+                    <h5>{{ item.category }}</h5>
+
+                    <h3>{{ item.productname }}</h3>
+
+                    <p>
+                        ₹{{ "%.2f"|format(item.saleprice|float) }} each
+                    </p>
+
+                    <div class="cart-actions">
+
+                        <!-- Quantity Update -->
+                        <form method="POST"
+                              action="{{ url_for('update_cart_quantity', cartid=item.cartid) }}">
+
+                            <label>Qty</label>
+
+                            <input
+                                type="number"
+                                name="quantity"
+                                value="{{ item.quantity }}"
+                                min="1"
+                                max="{{ item.stock }}"
+                                required
+                            >
+
+                            <button type="submit" class="update-btn">
+                                Update
+                            </button>
+
+                        </form>
+
+                        <!-- Remove -->
+                        <form method="POST"
+                              action="{{ url_for('remove_from_cart', cartid=item.cartid) }}">
+
+                            <button type="submit" class="remove-btn">
+                                Remove
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Subtotal -->
+                <div class="cart-price">
+
+                    <strong>
+                        ₹{{ "%.2f"|format(item.subtotal|float) }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+
+            <h2>Order summary</h2>
+
+            <div class="summary-row">
+                <span>Items</span>
+                <span>{{ total_items }}</span>
+            </div>
+
+            <hr>
+
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <strong>
+                    ₹{{ "%.2f"|format(subtotal|float) }}
+                </strong>
+            </div>
+
+            <div class="summary-row">
+                <span>Shipping</span>
+                <strong>
+                    ₹{{ "%.2f"|format(shipping|float) }}
+                </strong>
+            </div>
+
+            <hr>
+
+            <div class="summary-total">
+                <span>Total</span>
+                <strong>
+                    ₹{{ "%.2f"|format(total|float) }}
+                </strong>
+            </div>
+
+            <a href="{{ url_for('checkout') }}" class="checkout-btn">
+                Proceed to Checkout →
+            </a>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+
+        <h2>Your Cart is Empty</h2>
+
+        <p>You haven't added any products to your cart yet.</p>
+
+        <a href="{{ url_for('products') }}" class="start-shopping">
+            Start Shopping
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
